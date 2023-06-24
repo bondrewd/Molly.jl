@@ -33,10 +33,7 @@ function pairwise_force_kernel!(forces, coords_var, atoms_var, boundary, inters,
         i, j, special = neighbors[inter_i]
         coord_i, coord_j = coords[i], coords[j]
         dr = vector(coord_i, coord_j, boundary)
-        f = force_gpu(inters[1], dr, coord_i, coord_j, atoms[i], atoms[j], boundary, special)
-        for inter in inters[2:end]
-            f += force_gpu(inter, dr, coord_i, coord_j, atoms[i], atoms[j], boundary, special)
-        end
+        f = sum(force_gpu(inter, dr, coord_i, coord_j, atoms[i], atoms[j], boundary, special) for inter in inters)
         if unit(f[1]) != F
             # This triggers an error but it isn't printed
             # See https://discourse.julialang.org/t/error-handling-in-cuda-kernels/79692
